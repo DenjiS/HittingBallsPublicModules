@@ -1,0 +1,19 @@
+{
+    "name": "Player.UIGame",
+    "rootNamespace": "",
+    "references": [
+        "GUID:416966f9f7a4de34cb5b65bb1b47472a",
+        "GUID:272ccbe5898ff674eb9801c33bb10359",
+        "GUID:3d9e4cac190f9e84ba76659ddba20209",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

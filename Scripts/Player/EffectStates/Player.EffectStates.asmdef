@@ -1,0 +1,16 @@
+{
+    "name": "Player.EffectStates",
+    "rootNamespace": "",
+    "references": [
+        "GUID:272ccbe5898ff674eb9801c33bb10359"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

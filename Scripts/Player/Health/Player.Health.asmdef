@@ -1,0 +1,16 @@
+{
+    "name": "Player.Health",
+    "rootNamespace": "Player",
+    "references": [
+        "GUID:e28b74211ed9a0a44aab19b91189a5c1"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

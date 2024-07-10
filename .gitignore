@@ -9,6 +9,16 @@
 /[Bb]uilds/
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
+/[Pp]ackages/
+
+/[Aa]ssets/[Ii]mported/
+/[Aa]ssets/[Ss]amples/
+/[Aa]ssets/[Pp]lugins/
+/[Aa]ssets/[Ss]cripts/[Pp]ackage[Rr]ay[Ff]ire/
+
+[Aa]udio/
+[Mm]eshes/
+[Tt]extures/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
@@ -65,7 +75,8 @@ sysinfo.txt
 crashlytics-build.properties
 
 # Packed Addressables
-/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+# /[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin* TODO: Check, why it ignores obly .bin files.
+/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/
 
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta

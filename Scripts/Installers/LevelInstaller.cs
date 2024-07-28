@@ -14,11 +14,11 @@ namespace Installers
 
         private void Start()
         {
-            Initialize();
+            InitializePlayers();
             Time.timeScale = 1f;
         }
 
-        public void Initialize()
+        public void InitializePlayers()
         {
             PlayerConfiguration[] playerConfigs = PlayerConfigurationsManager.Instance.GetPlayerConfigurations();
 

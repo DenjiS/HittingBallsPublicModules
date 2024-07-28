@@ -61,7 +61,6 @@ namespace Player
         private CooldownTimer _damageMuteCooldown;
 
         private bool _canPickWeapon = true;
-        private bool _canPickGrenade = true;
 
         public UnityEvent ClickedPause;
 

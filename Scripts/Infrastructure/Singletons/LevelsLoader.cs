@@ -1,75 +1,143 @@
-using System.Collections;
-using System.Linq;
+using static System.TimeSpan;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.SceneManagement;
 
 namespace Infrastructure
 {
+    [RequireComponent(typeof(Animator))]
     public class LevelsLoader : Singleton<LevelsLoader>
     {
         private const string LevelLoadedAnimatorParameter = "IsLevelLoaded";
 
-        [SerializeField, HideInInspector] private string _launchSceneName;
-        [SerializeField, HideInInspector] private string _winnerSceneName;
-        [SerializeField, HideInInspector] private RandomArray<string> _sceneNames;
-
-#if UNITY_EDITOR
         [Header("Configuration")]
-        [SerializeField] private UnityEditor.SceneAsset _launchScene;
-        [SerializeField] private UnityEditor.SceneAsset _winnerScene;
-        [SerializeField] private UnityEditor.SceneAsset[] _scenes;
-#endif
+        [SerializeField] private AssetReference _logoScene;
+        [SerializeField] private AssetReference _launchScene;
+        [SerializeField] private AssetReference _winnerScene;
+        [SerializeField] private LevelsConfiguration _levels;
 
         [Header("Transition animations")]
         [SerializeField] private float _duration;
 
         private Animator _animator;
+        private AudioListener _interLevelListener;
+
+        private SceneInstance _currentScene;
+        private bool _hasActiveScene = false;
 
         protected override void Awake()
         {
             base.Awake();
-
             _animator = GetComponent<Animator>();
-
-            SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
-        protected override void OnDestroy()
+        private void OnEnable()
+        {
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            SceneManager.sceneUnloaded += OnSceneUnloaded;
+        }
+
+        private void OnDisable()
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
-            base.OnDestroy();
+            SceneManager.sceneUnloaded -= OnSceneUnloaded;
         }
 
-#if UNITY_EDITOR
-        private void OnValidate()
+        /// <summary>
+        /// Loads first scene. Takes <see cref="AudioListener"/> from Bootstrap for inter-scenes usage.
+        /// </summary>
+        /// <param name="listener"></param>
+        public async void LoadFirstScene(AudioListener listener)
         {
-            _launchSceneName = _launchScene.name;
-            _winnerSceneName = _winnerScene.name;
-            _sceneNames = new RandomArray<string>(_scenes.Select(scene => scene.name));
+            _interLevelListener = listener;
+            await LoadLevelAsync(_logoScene);
         }
-#endif
 
-        public void LoadLaunchScene() =>
-            StartCoroutine(LevelLoading(_launchSceneName));
+        /// <summary>
+        /// Loads main menu scene.
+        /// </summary>
+        public void LoadLaunchScene()
+        {
+            PerformAnimatedLoading(_launchScene);
+        }
 
+        /// <summary>
+        /// Loads winner scene after finished session.
+        /// </summary>
         public void LoadWinnerScene() =>
-            StartCoroutine(LevelLoading(_winnerSceneName));
+            PerformAnimatedLoading(_winnerScene);
 
+        /// <summary>
+        /// Loads next playable level.
+        /// </summary>
         public void LoadNext() =>
-            StartCoroutine(LevelLoading(_sceneNames.GetNewRandom()));
+            PerformAnimatedLoading(_levels
+                .SceneReferences
+                .GetNewRandom());
 
+        /// <summary>
+        /// Subscribes on <see cref="SceneManager.sceneLoaded"/>.
+        /// Level enter animation and loaded scene activation.
+        /// </summary>
+        /// <param name="scene"></param>
+        /// <param name="mode"></param>
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            _interLevelListener.enabled = false;
+
+            SceneManager.SetActiveScene(scene);
+        }
+
+        /// <summary>
+        /// Subscribes on <see cref="SceneManager.sceneUnloaded"/>.
+        /// </summary>
+        /// <param name="scene"></param>
+        /// <param name="mode"></param>
+        private void OnSceneUnloaded(Scene scene)
+        {
+            _interLevelListener.enabled = true;
+        }
+
+        /// <summary>
+        /// Plays animation and after loads next level.
+        /// </summary>
+        /// <param name="sceneReference">Next scene reference.</param>
+        /// <returns></returns>
+        private async void PerformAnimatedLoading(AssetReference sceneReference) // 2022.3.38 Coroutine sometimes doesn't work, behaves as it wasn't called.
+        {
+            _animator.SetBool(LevelLoadedAnimatorParameter, false);
+            await Task.Delay(FromSeconds(_duration));
+
+            await LoadLevelAsync(sceneReference);
+
             _animator.SetBool(LevelLoadedAnimatorParameter, true);
         }
 
-        private IEnumerator LevelLoading(string scene)
+        /// <summary>
+        /// Asynchronously <b>loads next</b> and <b>unloads previoust</b> scenes.
+        /// </summary>
+        /// <param name="sceneReference">Next scene reference.</param>
+        private async Task LoadLevelAsync(AssetReference sceneReference)
         {
-            _animator.SetBool(LevelLoadedAnimatorParameter, false);
+            if (_hasActiveScene)
+                await ManageSceneAsyncLoading(Addressables.UnloadSceneAsync(_currentScene), false);
 
-            yield return new WaitForSeconds(_duration);
+            await ManageSceneAsyncLoading(Addressables.LoadSceneAsync(sceneReference, LoadSceneMode.Additive), true);
+        }
 
-            SceneManager.LoadScene(scene);
+        private async Task ManageSceneAsyncLoading(AsyncOperationHandle<SceneInstance> loadingHandle, bool isLoaded)
+        {
+            await loadingHandle.Task;
+
+            _hasActiveScene = isLoaded;
+
+            if (isLoaded)
+                _currentScene = loadingHandle.Result;
+            else
+                _currentScene = new SceneInstance();
         }
     }
 }

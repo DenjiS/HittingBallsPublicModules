@@ -5,19 +5,12 @@ namespace Infrastructure
 {
     public class LogoSceneController : MonoBehaviour
     {
-        [SerializeField] private string _mainSceneName;
         [SerializeField] private float _duration;
 
-        private void Start()
-        {
-            MusicManager.Instance.GetComponent<AudioSource>().enabled = false;
-            StartCoroutine(Passing());
-        }
-
-        private IEnumerator Passing()
+        private IEnumerator Start()
         {
             yield return new WaitForSeconds(_duration);
-            MusicManager.Instance.GetComponent<AudioSource>().enabled = true;
+            MusicManager.Instance.Launch();
             LevelsLoader.Instance.LoadLaunchScene();
         }
     }
